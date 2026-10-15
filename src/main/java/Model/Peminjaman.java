@@ -115,9 +115,12 @@ public class Peminjaman {
     this.tanggalPinjam = tanggalPinjam;
 
 }
-
+    public String getTanggalPengembalian() {
+    return tanggalPengembalian;
+}
 
     public void setTanggalPengembalian(String tanggalPengembalian) {
+        
 
     if(tanggalPengembalian == null ||
        tanggalPengembalian.trim().isEmpty()) {

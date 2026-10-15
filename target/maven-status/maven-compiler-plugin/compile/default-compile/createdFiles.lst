@@ -1,1 +1,4 @@
-Repository\Database.class
+DAO\KostumDAO.class
+DAO\PeminjamanDAO.class
+Database\DatabaseConnection.class
+DAO\PelangganDAO.class

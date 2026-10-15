@@ -6,170 +6,140 @@ package Controller;
 
 import java.util.ArrayList;
 import Model.Kostum;
-import Repository.KostumRepository;
+import DAO.KostumDAO;
 import Interface.CRUDInterface;
-import Repository.Database;
 /**
  *
  * @author LENOVO
  */
 public class KostumController implements CRUDInterface<Kostum> {
-    private KostumRepository repository;
+    private final KostumDAO kostumDAO;
 
-    public KostumController(){
+    public KostumController() {
+        kostumDAO = new KostumDAO();
+    }
 
-    repository = Database.kostumRepository;
-
-}
-
-
-    public void tambahKostum(Kostum kostum){
-
-        if(kostum == null){
-
+    public void tambahKostum(Kostum kostum) {
+        if (kostum == null) {
             throw new IllegalArgumentException(
                     "Data kostum tidak boleh kosong"
             );
-
         }
 
+        if (kostumDAO.cariKostum(kostum.getIdKostum()) != null) {
+            throw new IllegalArgumentException(
+                    "ID Kostum sudah digunakan"
+            );
+        }
 
-        repository.tambahKostum(kostum);
-
+        kostumDAO.tambahKostum(kostum);
     }
 
-
-    public ArrayList<Kostum> tampilSemuaKostum(){
-
-        return repository.getSemuaKostum();
-
+    public ArrayList<Kostum> tampilSemuaKostum() {
+        return kostumDAO.tampilKostum();
     }
 
-
-    public Kostum cariKostum(String idKostum){
-
-        if(idKostum == null ||
-           idKostum.trim().isEmpty()){
+    public Kostum cariKostum(String idKostum) {
+        if (idKostum == null ||
+            idKostum.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "ID Kostum tidak boleh kosong"
             );
-
         }
 
-
-        return repository.cariKostum(idKostum);
-
+        return kostumDAO.cariKostum(idKostum);
     }
-
 
     public void updateKostum(
-        String idKostum,
-        String nama,
-        String kategori,
-        int ukuran,
-        double hargaSewa
-){
+            String idKostum,
+            String nama,
+            String kategori,
+            int ukuran,
+            double hargaSewa
+    ) {
 
-        if(idKostum == null ||
-           idKostum.trim().isEmpty()){
+        if (idKostum == null ||
+            idKostum.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "ID Kostum tidak boleh kosong"
             );
-
         }
 
+        if (kostumDAO.cariKostum(idKostum) == null) {
+            throw new IllegalArgumentException(
+                    "Data kostum tidak ditemukan"
+            );
+        }
 
-        repository.updateKostum(
-        idKostum,
-        nama,
-        kategori,
-        ukuran,
-        hargaSewa
-);
-
+        kostumDAO.updateKostum(
+                idKostum,
+                nama,
+                kategori,
+                ukuran,
+                hargaSewa
+        );
     }
 
-
-    public void hapusKostum(String idKostum){
-
-        if(idKostum == null ||
-           idKostum.trim().isEmpty()){
+    public void hapusKostum(String idKostum) {
+        if (idKostum == null ||
+            idKostum.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
                     "ID Kostum tidak boleh kosong"
             );
-
         }
 
+        if (kostumDAO.cariKostum(idKostum) == null) {
+            throw new IllegalArgumentException(
+                    "Data kostum tidak ditemukan"
+            );
+        }
 
-        repository.hapusKostum(idKostum);
-
+        kostumDAO.hapusKostum(idKostum);
     }
 
     @Override
-    public void tambah(Kostum kostum){
-
+    public void tambah(Kostum kostum) {
         tambahKostum(kostum);
-
     }
 
-
     @Override
-    public void tampil(){
-
+    public void tampil() {
         ArrayList<Kostum> daftar =
                 tampilSemuaKostum();
 
-
-        if(daftar.isEmpty()){
-
+        if (daftar.isEmpty()) {
             System.out.println(
                     "Data kostum belum tersedia"
             );
-
             return;
-
         }
 
-
-        for(Kostum k : daftar){
-
+        for (Kostum k : daftar) {
             k.tampilData();
-
             System.out.println();
+        }
+    }
 
+    @Override
+    public void update(String id) {
+        Kostum kostum = cariKostum(id);
+
+        if (kostum == null) {
+            throw new IllegalArgumentException(
+                    "Data kostum tidak ditemukan"
+            );
         }
 
-    }
-
-
-    @Override
-    public void update(String id){
-
-    Kostum kostum = cariKostum(id);
-
-    if(kostum == null){
-
-        throw new IllegalArgumentException(
-                "Data kostum tidak ditemukan"
+        System.out.println(
+                "Gunakan updateKostum() untuk mengubah data"
         );
-
     }
-
-    System.out.println(
-            "Gunakan updateKostum() untuk mengubah data"
-    );
-
-}
-
 
     @Override
-    public void hapus(String id){
-
+    public void hapus(String id) {
         hapusKostum(id);
-
     }
-
 }

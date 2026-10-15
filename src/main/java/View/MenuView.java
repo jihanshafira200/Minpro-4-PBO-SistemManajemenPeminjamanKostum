@@ -207,9 +207,10 @@ public class MenuView {
 
                     case 4:
                         pelangganController.updatePelanggan(
-                                inputString("ID Pelanggan : "),
-                                inputString("Nomor Telepon baru : "),
-                                inputString("Alamat baru : ")
+                        inputString("ID Pelanggan : "),
+                        inputString("Nama baru : "),
+                        inputString("Nomor Telepon baru : "),
+                        inputString("Alamat baru : ")
                         );
 
                         System.out.println("Data berhasil diupdate");
@@ -263,8 +264,8 @@ public class MenuView {
                                 inputString("ID Peminjaman : "),
                                 inputString("ID Pelanggan : "),
                                 inputString("ID Kostum : "),
-                                inputString("Tanggal Pinjam : "),
-                                inputString("Tanggal Pengembalian : ")
+                                inputString("Tanggal Pinjam (dd-MM-yyyy) : "),
+                                inputString("Tanggal Pengembalian (dd-MM-yyyy) : ")
                         );
 
                         System.out.println("Peminjaman berhasil");

@@ -7,32 +7,24 @@ import Model.Peminjaman;
 import Model.Pelanggan;
 import Model.Kostum;
 import java.util.ArrayList;
-import Repository.PeminjamanRepository;
-import Repository.PelangganRepository;
-import Repository.KostumRepository;
+import DAO.PeminjamanDAO;
+import DAO.PelangganDAO;
+import DAO.KostumDAO;
 import Interface.CRUDInterface;
-import Repository.Database;
 /**
  *
  * @author LENOVO
  */
 public class PeminjamanController implements CRUDInterface<Peminjaman> {
-    private PeminjamanRepository peminjamanRepository;
-    private PelangganRepository pelangganRepository;
-    private KostumRepository kostumRepository;
+    private final PeminjamanDAO peminjamanDAO;
+    private final PelangganDAO pelangganDAO;
+    private final KostumDAO kostumDAO;
 
-    public PeminjamanController(){
-
-    peminjamanRepository =
-            Database.peminjamanRepository;
-
-    pelangganRepository =
-            Database.pelangganRepository;
-
-    kostumRepository =
-            Database.kostumRepository;
-
-}
+    public PeminjamanController() {
+        peminjamanDAO = new PeminjamanDAO();
+        pelangganDAO = new PelangganDAO();
+        kostumDAO = new KostumDAO();
+    }
 
     public void tambahPeminjaman(
             String idPeminjaman,
@@ -40,41 +32,44 @@ public class PeminjamanController implements CRUDInterface<Peminjaman> {
             String idKostum,
             String tanggalPinjam,
             String tanggalPengembalian
-    ){
-        
+    ) {
+
+        if (idPeminjaman == null ||
+            idPeminjaman.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "ID Peminjaman tidak boleh kosong"
+            );
+        }
+
+        if (peminjamanDAO.cariPeminjaman(idPeminjaman) != null) {
+            throw new IllegalArgumentException(
+                    "ID Peminjaman sudah digunakan"
+            );
+        }
+
         Pelanggan pelanggan =
-                pelangganRepository
-                .cariPelanggan(idPelanggan);
+                pelangganDAO.cariPelanggan(idPelanggan);
 
-        if(pelanggan == null){
-
+        if (pelanggan == null) {
             throw new IllegalArgumentException(
                     "Pelanggan tidak ditemukan"
             );
-
         }
-        
+
         Kostum kostum =
-                kostumRepository
-                .cariKostum(idKostum);
+                kostumDAO.cariKostum(idKostum);
 
-        if(kostum == null){
-
+        if (kostum == null) {
             throw new IllegalArgumentException(
                     "Kostum tidak ditemukan"
             );
-
         }
 
-        if(
-            peminjamanRepository
-            .cekKostumDipinjam(idKostum)
-        ){
-
+        if (peminjamanDAO.cekKostumDipinjam(idKostum)) {
             throw new IllegalArgumentException(
                     "Kostum sedang dipinjam"
             );
-
         }
 
         Peminjaman peminjaman =
@@ -86,99 +81,123 @@ public class PeminjamanController implements CRUDInterface<Peminjaman> {
                         tanggalPengembalian
                 );
 
-        peminjamanRepository
-                .tambahPeminjaman(peminjaman);
-
+        peminjamanDAO.tambahPeminjaman(peminjaman);
     }
 
-
-    public ArrayList<Peminjaman>
-            tampilSemuaPeminjaman(){
-
-
-        return peminjamanRepository
-                .getSemuaPeminjaman();
-
+    public ArrayList<Peminjaman> tampilSemuaPeminjaman() {
+        return peminjamanDAO.tampilPeminjaman();
     }
-
 
     public Peminjaman cariPeminjaman(
             String idPeminjaman
-    ){
+    ) {
 
-        return peminjamanRepository
-                .cariPeminjaman(idPeminjaman);
+        if (idPeminjaman == null ||
+            idPeminjaman.trim().isEmpty()) {
 
+            throw new IllegalArgumentException(
+                    "ID Peminjaman tidak boleh kosong"
+            );
+        }
+
+        return peminjamanDAO.cariPeminjaman(idPeminjaman);
     }
-
 
     public void kembalikanKostum(
             String idPeminjaman
-    ){
+    ) {
 
-        peminjamanRepository
-                .updateStatusPengembalian(
-                        idPeminjaman
-                );
+        Peminjaman peminjaman =
+                cariPeminjaman(idPeminjaman);
 
+        if (peminjaman == null) {
+            throw new IllegalArgumentException(
+                    "Data peminjaman tidak ditemukan"
+            );
+        }
+
+        if ("Dikembalikan".equals(
+                peminjaman.getStatusPeminjaman())) {
+
+            throw new IllegalStateException(
+                    "Kostum sudah dikembalikan"
+            );
+        }
+
+        peminjamanDAO.updateStatusPengembalian(
+                idPeminjaman
+        );
     }
-
 
     public void hapusPeminjaman(
             String idPeminjaman
-    ){
+    ) {
 
-        peminjamanRepository
-                .hapusPeminjaman(
-                        idPeminjaman
-                );
+        if (cariPeminjaman(idPeminjaman) == null) {
+            throw new IllegalArgumentException(
+                    "Data peminjaman tidak ditemukan"
+            );
+        }
 
-    }
-@Override
-public void tambah(Peminjaman peminjaman){
-
-    if(peminjaman == null){
-
-        throw new IllegalArgumentException(
-                "Data peminjaman tidak boleh kosong"
+        peminjamanDAO.hapusPeminjaman(
+                idPeminjaman
         );
-
     }
 
-    peminjamanRepository
-            .tambahPeminjaman(peminjaman);
+    @Override
+    public void tambah(Peminjaman peminjaman) {
 
-}
+        if (peminjaman == null) {
+            throw new IllegalArgumentException(
+                    "Data peminjaman tidak boleh kosong"
+            );
+        }
 
+        if (peminjamanDAO.cariPeminjaman(
+                peminjaman.getIdPeminjaman()) != null) {
 
-@Override
-public void tampil(){
+            throw new IllegalArgumentException(
+                    "ID Peminjaman sudah digunakan"
+            );
+        }
 
-    for(Peminjaman p : tampilSemuaPeminjaman()){
+        if (peminjamanDAO.cekKostumDipinjam(
+                peminjaman.getKostum().getIdKostum())) {
 
-        p.tampilData();
+            throw new IllegalArgumentException(
+                    "Kostum sedang dipinjam"
+            );
+        }
 
-        System.out.println();
-
+        peminjamanDAO.tambahPeminjaman(peminjaman);
     }
 
-}
+    @Override
+    public void tampil() {
 
+        ArrayList<Peminjaman> daftar =
+                tampilSemuaPeminjaman();
 
-@Override
-public void update(String id){
+        if (daftar.isEmpty()) {
+            System.out.println(
+                    "Data peminjaman belum tersedia"
+            );
+            return;
+        }
 
-    kembalikanKostum(id);
+        for (Peminjaman p : daftar) {
+            p.tampilData();
+            System.out.println();
+        }
+    }
 
-}
+    @Override
+    public void update(String id) {
+        kembalikanKostum(id);
+    }
 
-
-@Override
-public void hapus(String id){
-
-    hapusPeminjaman(id);
-
-}
-
-
+    @Override
+    public void hapus(String id) {
+        hapusPeminjaman(id);
+    }
 }
